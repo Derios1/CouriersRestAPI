@@ -9,6 +9,7 @@ asyncpgsa = "*"
 aioreloader = "*"
 sqlalchemy = "*"
 marshmallow = "*"
+asyncpg = "*"
 
 [dev-packages]
 

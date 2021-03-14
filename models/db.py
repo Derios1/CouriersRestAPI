@@ -1,4 +1,6 @@
-from sqlalchemy import Table, Column, Text, Integer, ARRAY, MetaData, Enum as PgEnum
+from sqlalchemy import (Table, Column, Text, Integer,
+                        ARRAY, MetaData, Enum as PgEnum,
+                        REAL)
 
 from enum import Enum, unique
 
@@ -17,3 +19,10 @@ couriers = Table('couriers', meta,
                  Column('regions', ARRAY(Integer), nullable=False),
                  Column('working_hours', ARRAY(Text), nullable=False)
                  )
+
+orders = Table('orders', meta,
+               Column('order_id', Integer, primary_key=True, nullable=False),
+               Column('weight', REAL, nullable=False),
+               Column('region', Integer, nullable=False),
+               Column('delivery_hours', ARRAY(Text), nullable=False)
+               )
