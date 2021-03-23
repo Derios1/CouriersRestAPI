@@ -1,6 +1,8 @@
 from marshmallow import Schema, fields, validate
 from validators.time_validators import validate_hours
 
+courier_weights = {'foot': 10, 'bike': 15, 'car': 50}
+
 
 class CourierSchema(Schema):
     courier_id = fields.Integer(required=True, validate=validate.Range(min=1))

@@ -1,6 +1,6 @@
 from sqlalchemy import (Table, Column, Text, Integer,
                         ARRAY, MetaData, Enum as PgEnum,
-                        REAL)
+                        REAL, ForeignKey)
 
 from enum import Enum, unique
 
@@ -24,5 +24,8 @@ orders = Table('orders', meta,
                Column('order_id', Integer, primary_key=True, nullable=False),
                Column('weight', REAL, nullable=False),
                Column('region', Integer, nullable=False),
-               Column('delivery_hours', ARRAY(Text), nullable=False)
+               Column('delivery_hours', ARRAY(Text), nullable=False),
+               Column('courier_id', ForeignKey('couriers.courier_id')),
+               Column('assign_time', Text),
+               Column('complete_time', Text)
                )
