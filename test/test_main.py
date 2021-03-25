@@ -6,7 +6,7 @@ from datetime import datetime
 # For proper testing this tests should be started when tables is empty
 
 START_ID = 10
-HOST = "127.0.0.1"
+HOST = "178.154.196.179"
 PORT = "8888"
 COMPLETE_TIME = ""
 ORDER_COUR = {START_ID: START_ID, START_ID + 1: START_ID + 1, START_ID + 2: START_ID + 1,
@@ -113,7 +113,7 @@ class TestOrderAssign(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         resp_content = json.loads(resp.json())
         print(resp_content)
-        self.assertEqual(resp_content["orders"], [{'id': START_ID + 5}, {'id': START_ID + 1}, {'id': START_ID + 2}])
+        self.assertEqual(resp_content["orders"], [{'id': START_ID + 5}, {'id': START_ID + 1}])
 
         data = {"courier_id": START_ID + 2}
         resp = requests.post("http://{}:{}/orders/assign".format(HOST, PORT), data=json.dumps(data))

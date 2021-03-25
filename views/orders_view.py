@@ -66,7 +66,7 @@ class OrdersView(BasicView):
 
         for order in orders_table:
             order_info = dict(order)
-            if order_info['courier_id'] == cour_id and order_info['complete_time']:
+            if order_info['courier_id'] == cour_id and order_info['complete_time'] == '':
                 cour_weight -= float(order_info['weight'])
             if order_info['assign_time'] == '' and \
                     OrdersView.is_order_acceptable(courier_info, order_info):
