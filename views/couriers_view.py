@@ -54,7 +54,10 @@ class CourierView(BasicView):
         async with request.app['db'].acquire() as connection:
             query = couriers.update().where(
                 couriers.c.courier_id == cour_id).values(data)
-            await connection.execute(query)
+            res = await connection.execute(query)
+
+            if str(res).split()[1] == '0':
+                return Response(status=404)
 
             query = couriers.select().where(couriers.c.courier_id == cour_id)
             upd_courier = await connection.fetch(query)
@@ -100,6 +103,9 @@ class CourierView(BasicView):
         async with request.app['db'].acquire() as connection:
             query = couriers.select().where(couriers.c.courier_id == cour_id)
             cour_info = await connection.fetch(query)
+
+            if len(cour_info) == 0:
+                return Response(status=404)
             cour_info = dict(cour_info[0])
 
             query = orders.select().where(orders.c.courier_id == cour_id)

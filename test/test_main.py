@@ -149,7 +149,7 @@ class TestOrderComplete(unittest.TestCase):
         for i in range(7):
             data = {'courier_id': ORDER_COUR[START_ID + i], 'order_id': START_ID + i, 'complete_time': time}
             resp = requests.post("http://{}:{}/orders/complete".format(HOST, PORT), data=json.dumps(data))
-            if i in [6, 0]:
+            if i in [6, 0, 2]:
                 self.assertEqual(resp.status_code, 400)
             else:
                 resp_content = json.loads(resp.json())
