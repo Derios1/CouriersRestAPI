@@ -3,16 +3,42 @@ from models.db import couriers, orders
 from models.courier_schema import CourierSchema, courier_weights
 from marshmallow import ValidationError
 from views.basic_view import BasicView
+from views.orders_view import OrdersView
 from math import inf
 import datetime
 import json
-import requests
 
 
 class CourierView(BasicView):
     _namespace = {"name": "couriers", "name_id": "courier_id"}
     _schema = CourierSchema
     _table = couriers
+
+    @staticmethod
+    def __get_orders_to_reassign(courier: dict, orders_table: list):
+        courier_capacity = courier_weights[courier['courier_type']]
+        orders_to_reassign = []
+        for order in orders_table:
+            dict_order = dict(order)
+            if order['complete_time'] != '':
+                continue
+            if (dict_order['region'] not in courier['regions']
+                    or not OrdersView.is_order_acceptable(courier, dict_order)):
+                orders_to_reassign.append(dict_order)
+                orders_table.remove(order)
+            else:
+                courier_capacity -= order['weight']
+
+        orders_table.sort(key=lambda a: dict(a)['weight'])
+        pointer = len(orders_table) - 1
+
+        while courier_capacity < 0:
+            if orders_table[pointer]['complete_time'] == '':
+                orders_to_reassign.append(orders_table[pointer])
+                courier_capacity += orders_table[pointer]['weight']
+            pointer -= 1
+
+        return orders_to_reassign
 
     @staticmethod
     async def change_courier_info(request):
@@ -29,10 +55,20 @@ class CourierView(BasicView):
             query = couriers.update().where(
                 couriers.c.courier_id == cour_id).values(data)
             await connection.execute(query)
+
             query = couriers.select().where(couriers.c.courier_id == cour_id)
             upd_courier = await connection.fetch(query)
             upd_courier = dict(upd_courier[0])
-        requests.post('http://{}/orders/assign'.format(request.raw_headers[0][1].decode()), data=json.dumps({"courier_id": cour_id}))
+            query = orders.select().where(orders.c.courier_id == cour_id)
+            orders_table = await connection.fetch(query)
+            orders_to_reassign = CourierView.__get_orders_to_reassign(upd_courier, orders_table)
+
+            for order in orders_to_reassign:
+                order['courier_id'] = None
+                order['assign_time'] = ''
+                query = orders.update().where(orders.c.order_id == order['order_id']).values(order)
+                await connection.execute(query)
+
         return json_response(json.dumps(upd_courier), status=200)
 
     @staticmethod

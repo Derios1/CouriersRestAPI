@@ -19,8 +19,8 @@ class OrdersView(BasicView):
         Check if there are some intersections between
         time intervals of courier and order 
         """""""""
-        left = min(int1[0], int2[0])
-        right = max(int1[1], int2[1])
+        left = max(int1[0], int2[0])
+        right = min(int1[1], int2[1])
 
         return left <= right
 
@@ -66,7 +66,7 @@ class OrdersView(BasicView):
 
         for order in orders_table:
             order_info = dict(order)
-            if order_info['courier_id'] == cour_id:
+            if order_info['courier_id'] == cour_id and order_info['complete_time']:
                 cour_weight -= float(order_info['weight'])
             if order_info['assign_time'] == '' and \
                     OrdersView.is_order_acceptable(courier_info, order_info):
