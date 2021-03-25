@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, validate
 from validators.time_validators import validate_hours
 
 courier_weights = {'foot': 10, 'bike': 15, 'car': 50}
+courier_prices_c = {'foot': 2, 'bike': 5, 'car': 9}
 
 
 class CourierSchema(Schema):

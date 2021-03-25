@@ -3,8 +3,9 @@ from models.orders_schema import OrderSchema
 from views.basic_view import BasicView
 from aiohttp.web import Response, json_response
 from datetime import datetime
-from models.courier_schema import courier_weights
+from models.courier_schema import courier_weights, courier_prices_c
 from sqlalchemy import and_
+import json
 
 
 class OrdersView(BasicView):
@@ -13,7 +14,7 @@ class OrdersView(BasicView):
     _table = orders
 
     @staticmethod
-    def __is_intervals_intersect(int1, int2) -> bool:
+    def is_intervals_intersect(int1, int2) -> bool:
         """""""""
         Check if there are some intersections between
         time intervals of courier and order 
@@ -24,8 +25,8 @@ class OrdersView(BasicView):
         return left <= right
 
     @staticmethod
-    def __is_order_acceptable(courier: dict,
-                              order: dict) -> bool:
+    def is_order_acceptable(courier: dict,
+                            order: dict) -> bool:
         if not (order['region'] in courier['regions']):
             return False
         working_hours = list(map(lambda s: list(map(lambda spl: datetime.strptime(spl, "%H:%M"),
@@ -35,7 +36,7 @@ class OrdersView(BasicView):
 
         i, j = 0, 0
         while i < len(working_hours) and j < len(delivery_hours):
-            if OrdersView.__is_intervals_intersect(working_hours[i], delivery_hours[j]):
+            if OrdersView.is_intervals_intersect(working_hours[i], delivery_hours[j]):
                 return True
 
             if working_hours[i][1] < delivery_hours[j][1]:
@@ -68,7 +69,7 @@ class OrdersView(BasicView):
             if order_info['courier_id'] == cour_id:
                 cour_weight -= float(order_info['weight'])
             if order_info['assign_time'] == '' and \
-                    OrdersView.__is_order_acceptable(courier_info, order_info):
+                    OrdersView.is_order_acceptable(courier_info, order_info):
                 acceptable_orders.append(order_info)
 
         optimized_orders = []
@@ -91,7 +92,7 @@ class OrdersView(BasicView):
 
         if len(response_data['orders']) == 0:
             del response_data['assign_time']
-        return json_response(response_data, status=200)
+        return json_response(json.dumps(response_data), status=200)
 
     @staticmethod
     async def set_completed_order(request):
@@ -105,7 +106,15 @@ class OrdersView(BasicView):
                                           ).values(upd_time)
             res = await connection.execute(query)
 
-        if res.split()[1] == '0':
-            return Response(status=400)
+            if res.split()[1] == '0':
+                return Response(status=400)
 
-        return json_response({'order_id': data['order_id']}, status=200)
+            query = couriers.select().where(couriers.c.courier_id == int(data['courier_id']))
+            cour_info = await connection.fetch(query)
+            cour_info = dict(cour_info[0])
+            cour_info['earnings'] += 500*courier_prices_c[cour_info['courier_type']]
+            query = couriers.update().where(couriers.c.courier_id == int(data['courier_id'])).values(cour_info)
+
+            await connection.execute(query)
+
+        return json_response(json.dumps({'order_id': data['order_id']}), status=200)

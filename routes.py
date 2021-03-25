@@ -9,3 +9,4 @@ def set_routes(app: "Application"):
     app.router.add_post("/orders", OrdersView.load_data)
     app.router.add_post("/orders/assign", OrdersView.assign_orders)
     app.router.add_post("/orders/complete", OrdersView.set_completed_order)
+    app.router.add_get(r"/couriers/{courier_id:[1-9][0-9]*}", CourierView.get_cour_info)

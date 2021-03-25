@@ -17,7 +17,8 @@ couriers = Table('couriers', meta,
                  Column('courier_id', Integer, primary_key=True, nullable=False),
                  Column('courier_type', PgEnum(CourierType, name="courier_type"), nullable=False),
                  Column('regions', ARRAY(Integer), nullable=False),
-                 Column('working_hours', ARRAY(Text), nullable=False)
+                 Column('working_hours', ARRAY(Text), nullable=False),
+                 Column('earnings', Integer, default=0),
                  )
 
 orders = Table('orders', meta,
