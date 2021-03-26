@@ -42,9 +42,9 @@ class BasicView(metaclass=ABCMeta):
             response[name].append({"id": int(value_data[id_name])})
             try:
                 cls._schema().load(value_data)
-            except ValidationError:
+            except ValidationError as err:
                 invalid_ids["validation_error"][name].append(
-                    {"id": value_data[id_name]}
+                    {"id": value_data[id_name], "error": err.normalized_messages()}
                 )
 
         if len(invalid_ids["validation_error"][name]) == 0:

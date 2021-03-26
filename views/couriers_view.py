@@ -4,6 +4,7 @@ from models.courier_schema import CourierSchema, courier_weights
 from marshmallow import ValidationError
 from views.basic_view import BasicView
 from views.orders_view import OrdersView
+from sqlalchemy import and_
 from math import inf
 import datetime
 import json
@@ -108,7 +109,7 @@ class CourierView(BasicView):
                 return Response(status=404)
             cour_info = dict(cour_info[0])
 
-            query = orders.select().where(orders.c.courier_id == cour_id)
+            query = orders.select().where(and_(orders.c.courier_id == cour_id, orders.c.complete_time != ''))
             cour_orders = await connection.fetch(query)
 
             if len(cour_orders) == 0:
