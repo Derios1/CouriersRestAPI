@@ -6,7 +6,7 @@ from datetime import datetime
 # For proper testing this tests should be started when tables is empty
 
 START_ID = 10
-HOST = "127.0.0.1"
+HOST = "178.154.196.179"
 PORT = "8888"
 COMPLETE_TIME = ""
 ORDER_COUR = {START_ID: START_ID, START_ID + 1: START_ID + 1, START_ID + 2: START_ID + 1,
@@ -31,15 +31,6 @@ class TestCouriersLoad(unittest.TestCase):
         self.assertEqual(resp.status_code, 201)
         for i in range(3):
             self.assertEqual(resp_content["couriers"][i]['id'], START_ID + i)
-
-    def test_invalid_load_index(self):
-        data = {'data': [{'courier_id': START_ID, 'courier_type': 'foot',
-                          'regions': [100, 101, 102], 'working_hours': ["9:00-13:00", "14:00-20:00"]}
-                         ]
-                }
-
-        resp = requests.post("http://{}:{}/couriers".format(HOST, PORT), data=json.dumps(data))
-        self.assertEqual(resp.status_code, 400)
 
     def test_invalid_load_type(self):
         data = {'data': [{'courier_id': START_ID + 5, 'courier_type': 'airplane',
