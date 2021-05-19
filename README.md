@@ -1,4 +1,4 @@
-# BackendSchoolRestAPI
+# CouriersRestAPI
 
 ## Установка
 Необходимые зависимости устанавливаются с помощью pipenv.
